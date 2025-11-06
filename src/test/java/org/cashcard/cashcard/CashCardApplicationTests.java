@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.net.URI;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ContextConfiguration(classes = CashCardApplication.class)
@@ -39,5 +41,16 @@ class CashCardApplicationTests {
 
         Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertThat(response.getBody()).isNull();
+    }
+
+    @Test
+    void shouldCreateANewCashCard() {
+        CashCard cashCard = new CashCard(null, 250.00);
+        ResponseEntity<Void> response = restTemplate.postForEntity("/cashcards", cashCard, Void.class);
+        Assertions.assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        URI location = response.getHeaders().getLocation();
+        ResponseEntity<String> getResponse = restTemplate.getForEntity(location, String.class);
+        Assertions.assertEquals(HttpStatus.OK, getResponse.getStatusCode());
+        Assertions.assertNotNull(getResponse.getBody());
     }
 }
